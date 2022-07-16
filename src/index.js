@@ -21,13 +21,13 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
-
   socket.on('chat message', (msg) => {
     console.log(msg);
   });
 
-  socket.emit('chat message', 'Hello from the backend!');
+  socket.on('poke', () => {
+    io.emit('poke', 'You got poked!');
+  });
 });
 
 server.listen(serverConfig.port, () => {
