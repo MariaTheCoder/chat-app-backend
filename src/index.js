@@ -10,6 +10,7 @@ const io = new Server(server, {
     origin: '*',
   },
 });
+const connectedUsers = [];
 
 app.use(cors());
 
@@ -21,12 +22,26 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+  connectedUsers.push(socket);
+
   socket.on('chat message', (msg) => {
     console.log(msg);
   });
 
   socket.on('poke', () => {
-    io.emit('poke', 'You got poked!');
+    connectedUsers.forEach((user) => {
+      if (user.id !== socket.id) {
+        user.emit('poke', `You got poked by user: ${socket.id}`);
+      }
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`${socket.id} disconnected`);
+
+    const foundIndex = connectedUsers.findIndex((user) => user.id === socket.id);
+    // remove disconnected client from our array
+    connectedUsers.splice(foundIndex, 1);
   });
 });
 
